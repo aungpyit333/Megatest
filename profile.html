@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MangaZone Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #ff4c60;
+      --bg: #121212;
+      --card: #1e1e2f;
+      --text: #fff;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    nav {
+      background-color: #1b1b2f;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        background-color: #1b1b2f;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    .profile-container {
+      max-width: 600px;
+      margin: 3rem auto;
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .profile-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .profile-info {
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-info h2 {
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
+    }
+
+    .profile-info p {
+      margin: 0.3rem 0;
+      color: #ccc;
+      font-size: 1rem;
+    }
+
+    .profile-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .logout-btn,
+    .edit-btn,
+    .copy-btn {
+      padding: 0.6rem 1.2rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="password"] {
+      display: block;
+      margin: 0.5rem auto;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: none;
+      width: 80%;
+      background: #2a2a3c;
+      color: white;
+    }
+
+    .post-section {
+      margin-top: 2rem;
+      text-align: left;
+    }
+
+    .post-form textarea {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 1rem;
+      background: #2a2a3c;
+      color: white;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .post-form button {
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .post-list {
+      margin-top: 1rem;
+    }
+
+    .post-item {
+      background: #29293d;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      color: #eee;
+    }
+
+    .post-item time {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .post-action {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    .post-action:hover {
+      color: var(--primary);
+    }
+
+    .post-action.active {
+      color: var(--primary);
+    }
+
+    .comments-section {
+      margin-top: 1rem;
+      border-top: 1px solid #333;
+      padding-top: 1rem;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .comment-form input {
+      flex: 1;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: none;
+      background: #2a2a3c;
+      color: white;
+    }
+
+    .comment-form button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0 1rem;
+      cursor: pointer;
+    }
+
+    .comment-list {
+      margin-top: 1rem;
+    }
+
+    .comment-item {
+      background: #2a2a3c;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
+
+    .comment-author {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .comment-time {
+      font-size: 0.7rem;
+      color: #aaa;
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    .comment-action {
+      color: #ccc;
+      cursor: pointer;
+    }
+
+    .comment-action:hover {
+      color: var(--primary);
+    }
+
+    .reply-form {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .reply-form input {
+      flex: 1;
+      padding: 0.3rem;
+      border-radius: 4px;
+      border: none;
+      background: #333344;
+      color: white;
+      font-size: 0.8rem;
+    }
+
+    .reply-form button {
+      background: #444455;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0 0.5rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .reply-list {
+      margin-left: 1rem;
+      margin-top: 0.5rem;
+      border-left: 2px solid #444;
+      padding-left: 0.5rem;
+    }
+
+    .reply-item {
+      background: #333344;
+      padding: 0.3rem;
+      border-radius: 3px;
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    footer {
+      background: #1b1b2f;
+      padding: 2rem;
+      color: #ccc;
+      margin-top: 3rem;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      margin-top: 2rem;
+      border-top: 1px solid #333;
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .share-options {
+      display: none;
+      position: absolute;
+      background: var(--card);
+      padding: 0.5rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .share-options.show {
+      display: block;
+    }
+
+    .share-option {
+      padding: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .share-option:hover {
+      background: #2a2a3c;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">MangaZone</div>
+    <div class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="genres.html">Genres</a>
+      <a href="popular.html">Popular</a>
+      <a href="search.html">Search</a>
+    </div>
+  </nav>
+
+  <div class="profile-container" id="profileBox">
+    <img src="" alt="Profile" class="profile-img" id="profileImg">
+    <div class="profile-info">
+      <h2 id="profileName">Loading...</h2>
+      <p id="profileEmail"></p>
+      <p id="profileType"></p>
+    </div>
+
+    <div class="profile-actions">
+      <button class="copy-btn" onclick="copyProfileLink()">
+        <i class="fas fa-link"></i> Copy Profile Link
+      </button>
+      <div class="share-options" id="shareOptions">
+        <div class="share-option" onclick="shareOnFacebook()">
+          <i class="fab fa-facebook"></i> Facebook
+        </div>
+        <div class="share-option" onclick="shareOnTwitter()">
+          <i class="fab fa-twitter"></i> Twitter
+        </div>
+        <div class="share-option" onclick="shareOnWhatsApp()">
+          <i class="fab fa-whatsapp"></i> WhatsApp
+        </div>
+      </div>
+    </div>
+
+    <div id="ownerActions" style="display:none;">
+      <input type="file" id="profilePhotoInput" accept="image/*">
+      <input type="text" id="editName" placeholder="Enter new name">
+      <input type="password" id="newPassword" placeholder="New password">
+      <button class="edit-btn" onclick="updateProfile()">Update Profile</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+      <div class="post-section">
+        <h3>Your Posts</h3>
+        <div class="post-form">
+          <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+          <button onclick="addPost()">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="post-section">
+      <h3>Posts</h3>
+      <div class="post-list" id="postList"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-bottom">
+      &copy; 2025 MangaZone. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById("navLinks");
+      nav.classList.toggle("active");
+    }
+
+    function getQueryParam(key) {
+      const params = new URLSearchParams(location.search);
+      return params.get(key);
+    }
+
+    function copyProfileLink() {
+      const url = `${location.origin}${location.pathname}?uid=${window.viewUID}`;
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Profile link copied to clipboard!");
+      }).catch(err => {
+        console.error("Failed to copy: ", err);
+        // Fallback for browsers that don't support Clipboard API
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert("Profile link copied!");
+      });
+    }
+
+    function toggleShareOptions() {
+      const options = document.getElementById("shareOptions");
+      options.classList.toggle("show");
+    }
+
+    function shareOnFacebook() {
+      const url = encodeURIComponent(`${location.origin}${location.pathname}?uid=${viewUID}`);
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    }
+
+    function shareOnTwitter() {
+      const url = encodeURIComponent(`${location.origin}${location.pathname}?uid=${viewUID}`);
+      const text = encodeURIComponent(`Check out this profile on MangaZone!`);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    }
+
+    function shareOnWhatsApp() {
+      const url = encodeURIComponent(`${location.origin}${location.pathname}?uid=${viewUID}`);
+      const text = encodeURIComponent(`Check out this profile on MangaZone!`);
+      window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+    }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getDatabase, ref, get, update, push, set, onChildAdded, onValue, remove
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import {
+      getAuth, onAuthStateChanged, signOut, updatePassword
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getStorage, ref as sRef, uploadBytes, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDHcxJMAoL5uNXPjEfMoamba5bZaH0FCU",
+      authDomain: "megacomics-862d4.firebaseapp.com",
+      databaseURL: "https://megacomics-862d4-default-rtdb.firebaseio.com",
+      projectId: "megacomics-862d4",
+      storageBucket: "megacomics-862d4.appspot.com",
+      messagingSenderId: "448327465706",
+      appId: "1:448327465706:android:abefa380bb6f63e2f23593"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    let currentUID = "";
+    window.viewUID = getQueryParam("uid");
+    let currentUserData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!viewUID && user) viewUID = user.uid;
+      if (!viewUID) return window.location.href = "login.html";
+
+      if (user) {
+        currentUID = user.uid;
+        // Get current user data
+        const userRef = ref(db, `vip/${currentUID}`);
+        const snapshot = await get(userRef);
+        currentUserData = snapshot.exists() ? snapshot.val() : { name: "User", img: "" };
+      }
+      
+      const isOwner = viewUID === currentUID;
+      document.getElementById("ownerActions").style.display = isOwner ? "block" : "none";
+
+      const vipRef = ref(db, `vip/${viewUID}`);
+      get(vipRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById("profileImg").src = data.img || "default.jpg";
+          document.getElementById("profileName").textContent = data.name || "No Name";
+          document.getElementById("profileEmail").textContent = isOwner ? auth.currentUser?.email || "" : "";
+          document.getElementById("profileType").textContent = data.type ? `VIP Type: ${data.type}` : "VIP User";
+        } else {
+          document.getElementById("profileName").textContent = "No VIP Data";
+        }
+      });
+
+      loadPosts();
+    });
+
+    function loadPosts() {
+      const postRef = ref(db, `posts/${viewUID}`);
+      onValue(postRef, (snapshot) => {
+        const postList = document.getElementById("postList");
+        postList.innerHTML = "";
+        if (snapshot.exists()) {
+          const posts = Object.entries(snapshot.val()).sort((a, b) => b[1].timestamp - a[1].timestamp);
+          posts.forEach(([postId, post]) => {
+            renderPost(postId, post);
+          });
+        }
+      });
+    }
+
+    function renderPost(postId, post) {
+      const postList = document.getElementById("postList");
+      const div = document.createElement("div");
+      div.className = "post-item";
+      div.innerHTML = `
+        <p>${post.content}</p>
+        <time>${new Date(post.timestamp).toLocaleString()}</time>
+        <div>Views: ${post.viewCount || 0}</div>
+        <div class="post-actions">
+          <button class="post-action" onclick="toggleLike('${postId}')">
+            <i class="fas fa-heart"></i> 
+            <span id="likeCount-${postId}">${post.likeCount || 0}</span>
+          </button>
+          <button class="post-action" onclick="toggleCommentSection('${postId}')">
+            <i class="fas fa-comment"></i> Comment
+          </button>
+          <button class="post-action" onclick="sharePost('${postId}')">
+            <i class="fas fa-share"></i> Share
+          </button>
+        </div>
+        <div class="comments-section" id="comments-${postId}" style="display:none;">
+          <div class="comment-form">
+            <input type="text" id="commentInput-${postId}" placeholder="Write a comment...">
+            <button onclick="addComment('${postId}')">Post</button>
+          </div>
+          <div class="comment-list" id="commentList-${postId}"></div>
+        </div>
+      `;
+      postList.appendChild(div);
+
+      loadLikes(postId);
+      loadComments(postId);
+
+      if (currentUID !== viewUID) {
+        const viewRef = ref(db, `posts/${viewUID}/${postId}/viewCount`);
+        get(viewRef).then(viewSnap => {
+          const currentViews = viewSnap.exists() ? viewSnap.val() : 0;
+          update(ref(db, `posts/${viewUID}/${postId}`), {
+            viewCount: currentViews + 1
+          });
+        });
+      }
+    }
+
+    function loadLikes(postId) {
+      const likesRef = ref(db, `likes/${postId}`);
+      onValue(likesRef, (snapshot) => {
+        const likeCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+        const likeCountElement = document.getElementById(`likeCount-${postId}`);
+        if (likeCountElement) {
+          likeCountElement.textContent = likeCount;
+        }
+
+        if (currentUID && snapshot.exists() && snapshot.val()[currentUID]) {
+          const likeButton = document.querySelector(`#likeCount-${postId}`).parentNode;
+          likeButton.classList.add('active');
+        }
+      });
+    }
+
+    function loadComments(postId) {
+      const commentsRef = ref(db, `comments/${postId}`);
+      onValue(commentsRef, (snapshot) => {
+        const commentList = document.getElementById(`commentList-${postId}`);
+        if (!commentList) return;
+        
+        commentList.innerHTML = "";
+        if (snapshot.exists()) {
+          const comments = Object.entries(snapshot.val()).sort((a, b) => a[1].timestamp - b[1].timestamp);
+          comments.forEach(([commentId, comment]) => {
+            renderComment(postId, commentId, comment);
+          });
+        }
+      });
+    }
+
+    function renderComment(postId, commentId, comment) {
+      const commentList = document.getElementById(`commentList-${postId}`);
+      if (!commentList) return;
+
+      const commentDiv = document.createElement("div");
+      commentDiv.className = "comment-item";
+      commentDiv.innerHTML = `
+        <div class="comment-header">
+          <span class="comment-author">${comment.authorName}</span>
+          <span class="comment-time">${new Date(comment.timestamp).toLocaleString()}</span>
+        </div>
+        <p>${comment.content}</p>
+        <div class="comment-actions">
+          <span class="comment-action" onclick="toggleReplyForm('${postId}', '${commentId}')">Reply</span>
+          ${comment.authorId === currentUID ? 
+            `<span class="comment-action" onclick="deleteComment('${postId}', '${commentId}')">Delete</span>` : ''}
+        </div>
+        <div class="reply-form" id="replyForm-${postId}-${commentId}" style="display:none;">
+          <input type="text" id="replyInput-${postId}-${commentId}" placeholder="Write a reply...">
+          <button onclick="addReply('${postId}', '${commentId}')">Reply</button>
+        </div>
+        <div class="reply-list" id="replyList-${postId}-${commentId}"></div>
+      `;
+      commentList.appendChild(commentDiv);
+
+      loadReplies(postId, commentId);
+    }
+
+    function loadReplies(postId, commentId) {
+      const repliesRef = ref(db, `comments/${postId}/${commentId}/replies`);
+      onValue(repliesRef, (snapshot) => {
+        const replyList = document.getElementById(`replyList-${postId}-${commentId}`);
+        if (!replyList) return;
+        
+        replyList.innerHTML = "";
+        if (snapshot.exists()) {
+          const replies = Object.entries(snapshot.val()).sort((a, b) => a[1].timestamp - b[1].timestamp);
+          replies.forEach(([replyId, reply]) => {
+            const replyDiv = document.createElement("div");
+            replyDiv.className = "reply-item";
+            replyDiv.innerHTML = `
+              <div class="comment-header">
+                <span class="comment-author">${reply.authorName}</span>
+                <span class="comment-time">${new Date(reply.timestamp).toLocaleString()}</span>
+              </div>
+              <p>${reply.content}</p>
+              ${reply.authorId === currentUID ? 
+                `<div class="comment-actions">
+                  <span class="comment-action" onclick="deleteReply('${postId}', '${commentId}', '${replyId}')">Delete</span>
+                </div>` : ''}
+            `;
+            replyList.appendChild(replyDiv);
+          });
+        }
+      });
+    }
+
+    window.toggleLike = async function(postId) {
+      if (!currentUID) return alert("Please login to like posts");
+      
+      const likeRef = ref(db, `likes/${postId}/${currentUID}`);
+      const snapshot = await get(likeRef);
+      
+      if (snapshot.exists()) {
+        await remove(likeRef);
+      } else {
+        await set(likeRef, true);
+      }
+    };
+
+    window.toggleCommentSection = function(postId) {
+      const commentSection = document.getElementById(`comments-${postId}`);
+      if (commentSection.style.display === "none") {
+        commentSection.style.display = "block";
+      } else {
+        commentSection.style.display = "none";
+      }
+    };
+
+    window.toggleReplyForm = function(postId, commentId) {
+      const replyForm = document.getElementById(`replyForm-${postId}-${commentId}`);
+      if (replyForm.style.display === "none") {
+        replyForm.style.display = "flex";
+      } else {
+        replyForm.style.display = "none";
+      }
+    };
+
+    window.sharePost = function(postId) {
+      const url = `${location.origin}${location.pathname}?uid=${viewUID}#post-${postId}`;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Check out this post!',
+          text: 'View this post on MangaZone',
+          url: url
+        }).catch(err => {
+          console.log('Error sharing:', err);
+          copyToClipboard(url);
+        });
+      } else {
+        copyToClipboard(url);
+      }
+    };
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Link copied to clipboard!");
+      }).catch(err => {
+        console.error("Failed to copy: ", err);
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert("Link copied!");
+      });
+    }
+
+    window.addComment = async function(postId) {
+      if (!currentUID) return alert("Please login to comment");
+      
+      const commentInput = document.getElementById(`commentInput-${postId}`);
+      const content = commentInput.value.trim();
+      if (!content) return alert("Comment cannot be empty");
+
+      const commentRef = ref(db, `comments/${postId}`);
+      const newCommentRef = push(commentRef);
+      
+      await set(newCommentRef, {
+        content,
+        authorId: currentUID,
+        authorName: currentUserData.name,
+        authorImg: currentUserData.img || 'default.jpg',
+        timestamp: Date.now()
+      });
+
+      commentInput.value = "";
+    };
+
+    window.addReply = async function(postId, commentId) {
+      if (!currentUID) return alert("Please login to reply");
+      
+      const replyInput = document.getElementById(`replyInput-${postId}-${commentId}`);
+      const content = replyInput.value.trim();
+      if (!content) return alert("Reply cannot be empty");
+
+      const replyRef = ref(db, `comments/${postId}/${commentId}/replies`);
+      const newReplyRef = push(replyRef);
+      
+      await set(newReplyRef, {
+        content,
+        authorId: currentUID,
+        authorName: currentUserData.name,
+        authorImg: currentUserData.img || 'default.jpg',
+        timestamp: Date.now()
+      });
+
+      replyInput.value = "";
+      document.getElementById(`replyForm-${postId}-${commentId}`).style.display = "none";
+    };
+
+    window.deleteComment = async function(postId, commentId) {
+      if (!confirm("Are you sure you want to delete this comment?")) return;
+      
+      const commentRef = ref(db, `comments/${postId}/${commentId}`);
+      await remove(commentRef);
+    };
+
+    window.deleteReply = async function(postId, commentId, replyId) {
+      if (!confirm("Are you sure you want to delete this reply?")) return;
+      
+      const replyRef = ref(db, `comments/${postId}/${commentId}/replies/${replyId}`);
+      await remove(replyRef);
+    };
+
+    window.logout = () => {
+      signOut(auth).then(() => window.location.href = "login.html");
+    };
+
+    window.updateProfile = async () => {
+      const name = document.getElementById("editName").value.trim();
+      const password = document.getElementById("newPassword").value;
+      const file = document.getElementById("profilePhotoInput").files[0];
+
+      const updates = {};
+      if (name) updates.name = name;
+
+      if (file) {
+        const storageRef = sRef(storage, `profile_photos/${currentUID}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        updates.img = url;
+        document.getElementById("profileImg").src = url;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await update(ref(db, `vip/${currentUID}`), updates);
+        currentUserData = { ...currentUserData, ...updates };
+        if (updates.name) document.getElementById("profileName").textContent = updates.name;
+      }
+
+      if (password) {
+        const user = auth.currentUser;
+        await updatePassword(user, password).catch(err => alert(err.message));
+      }
+
+      alert("Profile updated.");
+    };
+
+    window.addPost = () => {
+      const content = document.getElementById("postContent").value.trim();
+      if (!content) return alert("Post content cannot be empty.");
+      const postRef = ref(db, `posts/${currentUID}`);
+      const newRef = push(postRef);
+      const postId = newRef.key;
+      const postData = {
+        content,
+        authorId: currentUID,
+        authorName: currentUserData.name,
+        authorImg: currentUserData.img || 'default.jpg',
+        timestamp: Date.now(),
+        viewCount: 0
+      };
+
+      const updates = {};
+      updates[`posts/${currentUID}/${postId}`] = postData;
+      updates[`likes/${postId}`] = {};
+      updates[`comments/${postId}`] = {};
+
+      update(ref(db), updates).then(() => {
+        document.getElementById("postContent").value = "";
+      });
+    };
+  </script>
+</body>
+</html>

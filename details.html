@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manga Details</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header, footer {
+      background-color: #1f1f2e;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    header h1, footer p {
+      margin: 0;
+      color: #ff4c60;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background-color: #333;
+    }
+
+    nav a:hover {
+      background-color: #ff4c60;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1f1f2e;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .info {
+      font-size: 1rem;
+      margin: 0.3rem 0;
+    }
+
+    .tags {
+      margin-top: 1rem;
+    }
+
+    .tag {
+      display: inline-block;
+      background-color: #ff4c60;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin: 5px;
+      font-size: 0.8rem;
+    }
+
+    .rating {
+      color: gold;
+    }
+
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    .chapter-item {
+      background-color: #2a2a3d;
+      border-radius: 8px;
+      text-align: center;
+      padding: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .chapter-item a {
+      color: #00bfff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .chapter-item:hover {
+      background-color: #ff4c60;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>MegaComics</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="mangalist.html">Comics</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card" id="mangaDetail">
+      <p>Loading...</p>
+    </div>
+
+    <div class="card" id="chapterList">
+      <h2>Chapters</h2>
+      <p>Loading chapters...</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 MegaComics. All rights reserved.</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDHcxJMAoL5uNXPjEfMoamba5bZaH0FCU",
+      authDomain: "megacomics-862d4.firebaseapp.com",
+      databaseURL: "https://megacomics-862d4-default-rtdb.firebaseio.com",
+      projectId: "megacomics-862d4",
+      storageBucket: "megacomics-862d4.appspot.com",
+      messagingSenderId: "448327465706",
+      appId: "1:448327465706:android:abefa380bb6f63e2f23593"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    const detailBox = document.getElementById("mangaDetail");
+    const chapterBox = document.getElementById("chapterList");
+
+    let viewedComics = JSON.parse(localStorage.getItem("viewedComics")) || [];
+
+    if (id) {
+      const itemRef = ref(db, "comics/" + id);
+
+      get(itemRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+
+          if (!viewedComics.includes(id)) {
+            const currentViews = parseInt(data.views) || 0;
+            update(itemRef, { views: currentViews + 1 })
+              .then(() => {
+                viewedComics.push(id);
+                localStorage.setItem("viewedComics", JSON.stringify(viewedComics));
+              });
+          }
+
+          const ratingValue = parseFloat(data.rating) || 0;
+          const roundedRating = Math.round(ratingValue);
+          const stars = Array.from({length: 5}, (_, i) => 
+            i < roundedRating 
+              ? '<i class="fas fa-star"></i>' 
+              : '<i class="far fa-star"></i>'
+          ).join('');
+
+          detailBox.innerHTML = `
+            <img src="${data.img}" alt="${data.title}" />
+            <div class="title">${data.title}</div>
+            <div class="info"><strong>Author:</strong> ${data.author_name}</div>
+            <div class="info"><strong>Translator:</strong> ${data.translator_name || "Unknown"}</div>
+            <div class="info"><strong>Review:</strong> ${data.review || "No review"}</div>
+            <div class="info"><strong>Views:</strong> ${data.views || 0}</div>
+            <div class="info"><strong>Rating:</strong> <span class="rating">${stars}</span> (${ratingValue})</div>
+            <div class="info"><strong>Read Link:</strong> <a href="${data.read}" target="_blank">${data.read}</a></div>
+            <div class="info"><strong>Telegram:</strong> <a href="${data.link}" target="_blank">${data.link}</a></div>
+<div class="tags">
+              ${Object.keys(data).filter(k => k.startsWith("type") && data[k]).map(k => `<a href="genres.html?genre=${encodeURIComponent(data[k])}" class="tag">${data[k]}</a>`).join("")}
+              ${data.what ? `<a href="genres.html?genre=${encodeURIComponent(data.what)}" class="tag">${data.what}</a>` : ""}
+              ${data.genre ? `<a href="genres.html?genre=${encodeURIComponent(data.genre)}" class="tag">${data.genre}</a>` : ""}
+            </div>
+          `;
+
+          // Load chapters
+          const epRef = ref(db, "ep");
+          get(epRef)
+            .then(chapterSnap => {
+              if (chapterSnap.exists()) {
+                const chapters = chapterSnap.val();
+                const matchedChapters = Object.entries(chapters)
+                  .filter(([_, val]) => val.id === data.id) // match by comic id
+                  .sort(([, a], [, b]) => {
+                    const epA = parseFloat(a.ep) || 0;
+                    const epB = parseFloat(b.ep) || 0;
+                    return epA - epB; // Ascending order
+                  });
+
+                if (matchedChapters.length > 0) {
+                  const chapterHTML = matchedChapters.map(([, val]) => `
+                    <div class="chapter-item">
+                      <a href="${val.read}" target="_blank">${val["ep name"] || val.ep || "Chapter"}</a>
+                    </div>
+                  `).join("");
+
+                  chapterBox.innerHTML = `<h2>Chapters</h2><div class='chapter-grid'>${chapterHTML}</div>`;
+                } else {
+                  chapterBox.innerHTML = "<h2>Chapters</h2><p>No chapters found.</p>";
+                }
+              } else {
+                chapterBox.innerHTML = "<h2>Chapters</h2><p>No chapter data available.</p>";
+              }
+            })
+            .catch(err => {
+              console.error("Error fetching chapters:", err);
+              chapterBox.innerHTML = "<h2>Chapters</h2><p>Error loading chapters.</p>";
+            });
+
+        } else {
+          detailBox.innerHTML = "<p>Manga not found.</p>";
+        }
+      }).catch(err => {
+        console.error("Error:", err);
+        detailBox.innerHTML = "<p>Error loading manga details.</p>";
+      });
+    } else {
+      detailBox.innerHTML = "<p>No ID specified in URL.</p>";
+    }
+  </script>
+
+</body>
+</html>

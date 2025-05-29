@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Comics</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header, footer {
+      background-color: #1f1f2e;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background-color: #333;
+    }
+
+    nav a:hover {
+      background-color: #ff4c60;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    .search-bar {
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background-color: #1f1f2e;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .card h3 {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    a {
+      color: #00bfff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Search Comics</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="mangalist.html">Comics</a>
+      <a href="search.html">Search</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="search-bar">
+      <input type="text" id="titleInput" placeholder="Search by Title..." />
+      <input type="text" id="typeInput" placeholder="Search by Type/Tag..." />
+    </div>
+
+    <div class="results" id="results">
+      <p>Loading comics...</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 MegaComics. All rights reserved.</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDHcxJMAoL5uNXPjEfMoamba5bZaH0FCU",
+      authDomain: "megacomics-862d4.firebaseapp.com",
+      databaseURL: "https://megacomics-862d4-default-rtdb.firebaseio.com",
+      projectId: "megacomics-862d4",
+      storageBucket: "megacomics-862d4.appspot.com",
+      messagingSenderId: "448327465706",
+      appId: "1:448327465706:android:abefa380bb6f63e2f23593"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const resultsBox = document.getElementById("results");
+    const titleInput = document.getElementById("titleInput");
+    const typeInput = document.getElementById("typeInput");
+
+    let allComics = [];
+
+    function displayResults(list) {
+      if (list.length === 0) {
+        resultsBox.innerHTML = "<p>No comics found.</p>";
+        return;
+      }
+
+      resultsBox.innerHTML = list.map(comic => `
+        <div class="card">
+          <a href="details.html?id=${comic.id}">
+            <img src="${comic.img}" alt="${comic.title}" />
+            <h3>${comic.title}</h3>
+            <p>${comic.author_name}</p>
+          </a>
+        </div>
+      `).join("");
+    }
+
+    onValue(ref(db, "comics"), snapshot => {
+      allComics = [];
+      snapshot.forEach(child => {
+        const val = child.val();
+        val.id = child.key;
+        allComics.push(val);
+      });
+      displayResults(allComics);
+    });
+
+    function filterComics() {
+      const titleQuery = titleInput.value.toLowerCase();
+      const typeQuery = typeInput.value.toLowerCase();
+
+      const filtered = allComics.filter(comic => {
+        const titleMatch = comic.title?.toLowerCase().includes(titleQuery);
+        const types = Object.keys(comic).filter(k => k.startsWith("type") && comic[k]);
+        const typeValues = types.map(t => comic[t].toLowerCase());
+        const what = comic.what?.toLowerCase() || "";
+        const typeMatch = typeValues.concat(what).some(t => t.includes(typeQuery));
+        return titleMatch && typeMatch;
+      });
+
+      displayResults(filtered);
+    }
+
+    titleInput.addEventListener("input", filterComics);
+    typeInput.addEventListener("input", filterComics);
+  </script>
+
+</body>
+</html>
